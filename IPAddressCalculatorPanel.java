@@ -15,7 +15,8 @@ public class IPAddressCalculatorPanel extends JPanel{
         JLabel subnetMaskLabel = new JLabel("Subnetz-Maske:");
 
         ipAddressField = new JTextField(15);
-        subnetMaskComboBox = new JComboBox<>(new Integer[]{24, 25, 26, 27, 28}); // Subnetzmaskenoptionen als Integer
+        // Subnetzmaskenoptionen als Integer
+        subnetMaskComboBox = new JComboBox<>(new Integer[]{24, 25, 26, 27, 28});
         networkAddressField = new JTextField(15);
         broadcastAddressField = new JTextField(15);
         gatewayAddressField = new JTextField(15);
@@ -131,7 +132,8 @@ public class IPAddressCalculatorPanel extends JPanel{
 
     private InetAddress calculateGatewayAddress(InetAddress networkAddress) throws UnknownHostException{
         byte[] ipBytes = networkAddress.getAddress();
-        ipBytes[ipBytes.length - 1]++; // Increment the last byte to get the next valid IP
+        
+        ipBytes[ipBytes.length - 1]++; 
 
         return InetAddress.getByAddress(ipBytes);
     }

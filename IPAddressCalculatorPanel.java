@@ -4,18 +4,20 @@ import java.awt.event.ActionListener;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+// Die Klasse steht für das Hauptpanel der GUI-Anwendung
 public class IPAddressCalculatorPanel extends JPanel{
 
     private JTextField ipAddressField, networkAddressField, broadcastAddressField, gatewayAddressField;
     private JComboBox<Integer> subnetMaskComboBox;
     private JButton calculateButton, resetButton;
 
+    // Konstruktor für die GUI
     public IPAddressCalculatorPanel(){
-        JLabel ipAddressLabel = new JLabel("IP-Addresse:");
+        // GUI-Komponenten erstellen
+        JLabel ipAddressLabel = new JLabel("IP-Adresse:");
         JLabel subnetMaskLabel = new JLabel("Subnetz-Maske:");
 
         ipAddressField = new JTextField(15);
-        // Subnetzmaskenoptionen als Integer
         subnetMaskComboBox = new JComboBox<>(new Integer[]{24, 25, 26, 27, 28});
         networkAddressField = new JTextField(15);
         broadcastAddressField = new JTextField(15);
@@ -24,7 +26,7 @@ public class IPAddressCalculatorPanel extends JPanel{
         calculateButton = new JButton("Berechnen");
         calculateButton.addActionListener(new ActionListener(){
             @Override
-            public void actionPerformed(ActionEvent e){
+            public void actionPerformed(ActionEvent e) {
                 calculateAddresses();
             }
         });
@@ -37,11 +39,13 @@ public class IPAddressCalculatorPanel extends JPanel{
             }
         });
 
+        // Layout-Manager setzen
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
 
+        // GUI-Komponenten im Layout anordnen
         layout.setHorizontalGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addComponent(ipAddressLabel)
@@ -71,53 +75,72 @@ public class IPAddressCalculatorPanel extends JPanel{
                 .addComponent(resetButton));
     }
 
+    // Methode zur Berechnung der IP-Adressen
     private void calculateAddresses(){
-        try {
+        try{
+            // IP-Adresse und Subnetzmaske aus den GUI-Elementen abrufen
             String ipAddress = ipAddressField.getText();
             int subnetMask = (int) subnetMaskComboBox.getSelectedItem();
 
-            if (!ipAddress.isEmpty()){
+            // Überprüfen, ob die eingegebene IP-Adresse gültig ist
+            if (isValidIPAddress(ipAddress)){
+                // IP-Adresse und Subnetzmaske in Objekte konvertieren
                 InetAddress inetAddress = InetAddress.getByName(ipAddress);
                 InetAddress subnetAddress = calculateSubnetMask(subnetMask);
 
+                // Netzwerk-, Broadcast- und Gateway-Adressen berechnen
                 InetAddress networkAddress = calculateNetworkAddress(inetAddress, subnetAddress);
                 InetAddress broadcastAddress = calculateBroadcastAddress(inetAddress, subnetAddress);
                 InetAddress gatewayAddress = calculateGatewayAddress(networkAddress);
 
+                // Ergebnisse in GUI-Elemente eintragen
                 networkAddressField.setText(networkAddress.getHostAddress());
                 broadcastAddressField.setText(broadcastAddress.getHostAddress());
                 gatewayAddressField.setText(gatewayAddress.getHostAddress());
 
-            } else{
-                JOptionPane.showMessageDialog(this, "IP-Addresse wird benötigt", "Error 404", JOptionPane.ERROR_MESSAGE);
+            } else {
+                // Fehlermeldung anzeigen, wenn die IP-Adresse ungültig ist
+                JOptionPane.showMessageDialog(this, "Ungültiges IP-Adressenformat", "Fehler", JOptionPane.ERROR_MESSAGE);
             }
-        } catch(UnknownHostException e){
-            JOptionPane.showMessageDialog(this, "Ungültige IP-Addresse oder Subnetz-Maske", "Error 404", JOptionPane.ERROR_MESSAGE);
+        } catch (UnknownHostException e) {
+            // Fehlermeldung anzeigen, wenn es Probleme mit der IP-Adresse oder Subnetzmaske gibt
+            JOptionPane.showMessageDialog(this, "Ungültige IP-Adresse oder Subnetz-Maske", "Fehler", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // Methode zur Überprüfung des IP-Adressenformats mit Regex
+    private boolean isValidIPAddress(String ipAddress) {
+        // Regex für einfache Überprüfung einer IPv4-Adresse
+        String ipPattern = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b";
+        return ipAddress.matches(ipPattern);
+    }
+
+    // Methode zur Berechnung der Subnetzmaske
     private InetAddress calculateSubnetMask(int subnetMask) throws UnknownHostException{
         byte[] subnetBytes = new byte[4];
 
-        for(int i = 0; i < subnetMask; i++){
+        // Setzt die entsprechende Anzahl von Bits in der Subnetzmaske auf 1
+        for (int i = 0; i < subnetMask; i++){
             subnetBytes[i / 8] |= (1 << (7 - (i % 8)));
         }
 
         return InetAddress.getByAddress(subnetBytes);
     }
 
+    // Methode zur Berechnung der Netzwerkadresse
     private InetAddress calculateNetworkAddress(InetAddress ipAddress,
                                                 InetAddress subnetMask) throws UnknownHostException{
         byte[] ipBytes = ipAddress.getAddress();
         byte[] subnetBytes = subnetMask.getAddress();
 
-        for (int i = 0; i < ipBytes.length; i++) {
+        for (int i = 0; i < ipBytes.length; i++){
             ipBytes[i] = (byte) (ipBytes[i] & subnetBytes[i]);
         }
 
         return InetAddress.getByAddress(ipBytes);
     }
 
+    // Methode zur Berechnung der Broadcast-Adresse
     private InetAddress calculateBroadcastAddress(InetAddress ipAddress,
                                                   InetAddress subnetMask) throws UnknownHostException{
         byte[] ipBytes = ipAddress.getAddress();
@@ -130,14 +153,16 @@ public class IPAddressCalculatorPanel extends JPanel{
         return InetAddress.getByAddress(ipBytes);
     }
 
+    // Methode zur Berechnung der Gateway-Adresse
     private InetAddress calculateGatewayAddress(InetAddress networkAddress) throws UnknownHostException{
         byte[] ipBytes = networkAddress.getAddress();
-        
-        ipBytes[ipBytes.length - 1]++; 
+        // Das letzte Byte inkrementieren, um die nächste gültige IP-Adresse zu erhalten
+        ipBytes[ipBytes.length - 1]++;
 
         return InetAddress.getByAddress(ipBytes);
     }
 
+    // Methode zum Zurücksetzen der GUI-Elemente
     private void resetFields(){
         ipAddressField.setText("");
         networkAddressField.setText("");

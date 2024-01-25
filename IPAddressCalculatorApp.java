@@ -1,11 +1,15 @@
-/* import javax.swing.*;
+import javax.swing.*;
 
 public class IPAddressCalculatorApp{
-    public static void main(Stringz[] args){
+    // Hauptmethode zum Starten der Anwendung
+    public static void main(String[] args){
+        // GUI-Komponenten in einem separaten Thread erstellen und anzeigen
         SwingUtilities.invokeLater(() -> {
+            // Instanz der IPAddressCalculatorFrame-Klasse erstellen
             IPAddressCalculatorFrame calculatorFrame = new IPAddressCalculatorFrame();
-            calculatorFrame.setVisible(true));
+
+            // Das Hauptfenster sichtbar machen
+            calculatorFrame.setVisible(true);
         });
     }
 }
-*/
